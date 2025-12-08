@@ -1,0 +1,189 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+
+const Consultar = () => {
+  const [solicitacoes, setSolicitacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  const usuarioLogado = localStorage.getItem("usuarioNome");
+  const categoriaLogado = localStorage.getItem("usuarioCategoria");
+
+  // 🔄 Atualiza status da solicitação
+  const atualizarStatus = (id, novoStatus) => {
+    axios
+      .post("http://localhost:3001/atualizar-status", { id, status: novoStatus })
+      .then(() => {
+        setSolicitacoes((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, status: novoStatus } : s))
+        );
+      })
+      .catch((err) => {
+        console.error("Erro ao atualizar status:", err);
+        alert("Erro ao atualizar status");
+      });
+  };
+  const editarItem = (id, descricaoAtual, valorAtual) => {
+    const novoNome = prompt("Digite o novo nome do produto:", descricaoAtual);
+    if (novoNome === null) return;
+
+    const novoValor = prompt("Digite o novo valor do produto:", valorAtual);
+    if (novoValor === null) return;
+
+    axios
+      .post("http://localhost:3001/atualizar-item", {
+        id,
+        produtoDescricao: novoNome,
+        valor: parseFloat(novoValor),
+      })
+      .then(() => {
+        setSolicitacoes(prev =>
+          prev.map(s => s.id === id ? { ...s, produtoDescricao: novoNome, valor: parseFloat(novoValor) } : s)
+        );
+        alert("Item atualizado com sucesso!");
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Erro ao atualizar item");
+      });
+  };
+
+
+  // 🔎 Buscar solicitações
+  useEffect(() => {
+    axios
+      .post("http://localhost:3001/consultar", {
+        usuario: usuarioLogado,
+        categoria: categoriaLogado,
+      })
+      .then((res) => {
+        setSolicitacoes(res.data);
+        setCarregando(false);
+      })
+      .catch((err) => {
+        console.error("Erro ao buscar solicitações:", err);
+        setCarregando(false);
+      });
+  }, [usuarioLogado, categoriaLogado]);
+
+  if (carregando) {
+    return <h2 style={{ textAlign: "center" }}>⏳ Carregando solicitações...</h2>;
+  }
+
+  return (
+    <div style={{ padding: "20px" }}>
+      <h2 style={{ marginBottom: "20px" }}>
+        📦 Solicitações{" "}
+        {categoriaLogado === "Supervisor"
+          ? "(Todas)"
+          : categoriaLogado === "Operacoes"
+            ? "(Pendentes + Aprovadas)"
+            : categoriaLogado === "Contábil"
+              ? "(Apenas Aprovadas)"
+              : `(Usuário: ${usuarioLogado})`}
+
+      </h2>
+
+      {solicitacoes.length === 0 ? (
+        <h3>Nenhuma solicitação encontrada.</h3>
+      ) : (
+        <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #ddd" }}>
+          <thead>
+            <tr style={{ background: "#f3f3f3" }}>
+              <th style={st.th}>ID</th>
+              <th style={st.th}>Origem</th>
+              <th style={st.th}>Destino</th>
+              <th style={st.th}>Produto</th>
+              <th style={st.th}>Status</th>
+              <th style={st.th}>Data</th>
+              <th style={st.th}>Usuário</th>
+              {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
+                <th style={st.th}>Ações</th>
+              )}
+            </tr>
+          </thead>
+
+          <tbody>
+            {solicitacoes.map((s) => (
+              <tr key={s.id}>
+                <td style={st.td}>{s.id}</td>
+                <td style={st.td}>{s.origem}</td>
+                <td style={st.td}>{s.destino}</td>
+                <td style={st.td}>{s.produtoDescricao}</td>
+                <td style={{ ...st.td, fontWeight: "bold" }}>{s.status}</td>
+                <td style={st.td}>{new Date(s.data).toLocaleString("pt-BR")}</td>
+                <td style={st.td}>{s.usuario}</td>
+
+                {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
+                  <td style={st.td}>
+                    {categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" ? (
+                      <>
+                        <button
+                          style={btnGreen}
+                          onClick={() => atualizarStatus(s.id, "Aprovado")}
+                        >
+                          Aprovar
+                        </button>
+                        <button
+                          style={btnRed}
+                          onClick={() => atualizarStatus(s.id, "Reprovado")}
+                        >
+                          Reprovar
+                        </button>
+                      </>
+                    ) : null}
+
+                    {categoriaLogado === "Contabil" ? (
+                      <button
+                        style={btnBlue}
+                        onClick={() => editarItem(s.id, s.produtoDescricao, s.valor)}
+                      >
+                        Editar
+                      </button>
+                    ) : null}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+      )}
+    </div>
+  );
+};
+
+const st = {
+  th: { border: "1px solid #ddd", padding: "8px", textAlign: "center" },
+  td: { border: "1px solid #ddd", padding: "8px", textAlign: "center" },
+};
+
+const btnGreen = {
+  backgroundColor: "green",
+  color: "#fff",
+  marginRight: "5px",
+  padding: "5px 10px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+};
+
+const btnRed = {
+  backgroundColor: "red",
+  color: "#fff",
+  padding: "5px 10px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+};
+
+const btnBlue = {
+  backgroundColor: "blue",
+  color: "#fff",
+  padding: "5px 10px",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  marginRight: "5px",
+};
+
+export default Consultar;
