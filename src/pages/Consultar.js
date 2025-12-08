@@ -8,6 +8,19 @@ const Consultar = () => {
   const usuarioLogado = localStorage.getItem("usuarioNome");
   const categoriaLogado = localStorage.getItem("usuarioCategoria");
 
+  const [modalAberta, setModalAberta] = useState(false);
+  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState(null);
+  const abrirModal = (sol) => {
+    setSolicitacaoSelecionada(sol);
+    setModalAberta(true);
+  };
+
+  const fecharModal = () => {
+    setModalAberta(false);
+    setSolicitacaoSelecionada(null);
+  };
+
+
   // 🔄 Atualiza status da solicitação
   const atualizarStatus = (id, novoStatus) => {
     axios
@@ -96,9 +109,11 @@ const Consultar = () => {
               <th style={st.th}>Status</th>
               <th style={st.th}>Data</th>
               <th style={st.th}>Usuário</th>
+
               {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
                 <th style={st.th}>Ações</th>
               )}
+              <th style={st.th}>Detalhes</th>
             </tr>
           </thead>
 
@@ -110,11 +125,13 @@ const Consultar = () => {
                 <td style={st.td}>{s.destino}</td>
                 <td style={st.td}>{s.produtoDescricao}</td>
                 <td style={{ ...st.td, fontWeight: "bold" }}>{s.status}</td>
-                <td style={st.td}>{new Date(s.data).toLocaleString("pt-BR")}</td>
+                {/* <td style={st.td}>{new Date(s.data).toLocaleString("pt-BR")}</td> */}
+                <td style={st.td}>{s.dataCriacao}</td>
                 <td style={st.td}>{s.usuario}</td>
 
                 {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
                   <td style={st.td}>
+
                     {categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" ? (
                       <>
                         <button
@@ -141,13 +158,39 @@ const Consultar = () => {
                       </button>
                     ) : null}
                   </td>
+
+
                 )}
+
+                <td style={st.td}>
+                  <button style={btnBlue} onClick={() => abrirModal(s)}>
+                    ...
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
 
       )}
+      {modalAberta && solicitacaoSelecionada && (
+        <div style={modalStyle.overlay}>
+          <div style={modalStyle.content}>
+            <h3>Detalhes da Solicitação #{solicitacaoSelecionada.id}</h3>
+            <button style={modalStyle.closeBtn} onClick={fecharModal}>
+              ✖
+            </button>
+            <div style={{ marginTop: 10 }}>
+              {Object.entries(solicitacaoSelecionada).map(([key, value]) => (
+                <p key={key}>
+                  <strong>{key}:</strong> {value?.toString() || "—"}
+                </p>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
@@ -155,6 +198,40 @@ const Consultar = () => {
 const st = {
   th: { border: "1px solid #ddd", padding: "8px", textAlign: "center" },
   td: { border: "1px solid #ddd", padding: "8px", textAlign: "center" },
+};
+const modalStyle = {
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+  },
+  content: {
+    background: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+    maxHeight: "80%",
+    overflowY: "auto",
+    position: "relative",
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    background: "red",
+    color: "#fff",
+    border: "none",
+    borderRadius: 5,
+    padding: "5px 10px",
+    cursor: "pointer",
+  },
 };
 
 const btnGreen = {
