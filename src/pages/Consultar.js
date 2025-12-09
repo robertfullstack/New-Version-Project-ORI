@@ -4,6 +4,23 @@ import axios from "axios";
 const Consultar = () => {
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const labels = {
+    nomeGerente: "Nome do Gerente",
+    usuario: "Usuário",
+    categoria: "Categoria",
+    loja: "Loja",
+    origem: "Origem",
+    destino: "Destino",
+    rotaEnvio: "Rota de Envio",
+    volume: "Volume",
+    valor: "Valor",
+    motivo: "Motivo",
+    registro: "Registro",
+    produtoDescricao: "Descrição do Produto",
+    produtoCodigo: "Código do Produto",
+    dataCriacao: "Data de Criação",
+    // adicione mais se quiser
+  };
 
   const usuarioLogado = localStorage.getItem("usuarioNome");
   const categoriaLogado = localStorage.getItem("usuarioCategoria");
@@ -18,6 +35,18 @@ const Consultar = () => {
   const fecharModal = () => {
     setModalAberta(false);
     setSolicitacaoSelecionada(null);
+  };
+  const formatarDataHora = (data) => {
+    if (!data) return "";
+
+    return new Date(data).toLocaleString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
   };
 
 
@@ -102,13 +131,13 @@ const Consultar = () => {
         <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #ddd" }}>
           <thead>
             <tr style={{ background: "#f3f3f3" }}>
-              <th style={st.th}>ID</th>
+              {/* <th style={st.th}>ID</th> */}
+              <th style={st.th}>Produto</th>
+              <th style={st.th}>Usuário Solicitante</th>
               <th style={st.th}>Origem</th>
               <th style={st.th}>Destino</th>
-              <th style={st.th}>Produto</th>
               <th style={st.th}>Status</th>
-              <th style={st.th}>Data</th>
-              <th style={st.th}>Usuário</th>
+              <th style={st.th}>Data de Criação</th>
 
               {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
                 <th style={st.th}>Ações</th>
@@ -120,14 +149,15 @@ const Consultar = () => {
           <tbody>
             {solicitacoes.map((s) => (
               <tr key={s.id}>
-                <td style={st.td}>{s.id}</td>
+                {/* <td style={st.td}>{s.id}</td> */}
+                <td style={st.td}>{s.produtoDescricao}</td>
+                <td style={st.td}>{s.usuario}</td>
                 <td style={st.td}>{s.origem}</td>
                 <td style={st.td}>{s.destino}</td>
-                <td style={st.td}>{s.produtoDescricao}</td>
                 <td style={{ ...st.td, fontWeight: "bold" }}>{s.status}</td>
                 {/* <td style={st.td}>{new Date(s.data).toLocaleString("pt-BR")}</td> */}
-                <td style={st.td}>{s.dataCriacao}</td>
-                <td style={st.td}>{s.usuario}</td>
+                <td style={st.td}>{formatarDataHora(s.dataCriacao)}</td>
+
 
                 {(categoriaLogado === "Supervisor" || categoriaLogado === "Operacoes" || categoriaLogado === "Contabil") && (
                   <td style={st.td}>
@@ -181,11 +211,31 @@ const Consultar = () => {
               ✖
             </button>
             <div style={{ marginTop: 10 }}>
-              {Object.entries(solicitacaoSelecionada).map(([key, value]) => (
-                <p key={key}>
-                  <strong>{key}:</strong> {value?.toString() || "—"}
-                </p>
-              ))}
+              {Object.entries(solicitacaoSelecionada).map(([key, value]) => {
+                const texto = value?.toString() || "—";
+
+                // Detecta imagem Base64
+                const isBase64Image = typeof texto === "string" && texto.startsWith("data:image");
+
+                return (
+                  <div key={key} style={{ marginBottom: 8 }}>
+                    <strong>{labels[key] || key}:</strong>
+
+                    {isBase64Image ? (
+                      <div>
+                        <img
+                          src={texto}
+                          alt={key}
+                          style={{ width: "200px", marginTop: 5, borderRadius: 8 }}
+                        />
+                      </div>
+                    ) : (
+                      <span> {texto}</span>
+                    )}
+                  </div>
+                );
+              })}
+
             </div>
           </div>
         </div>

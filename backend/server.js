@@ -225,6 +225,34 @@ app.post("/atualizar-documento-fiscal", async (req, res) => {
     }
 });
 
+// CONSULTAR RECEBIMENTOS POR LOJA
+app.get("/recebimentos/:loja", async (req, res) => {
+    const { loja } = req.params;
+
+    try {
+        let pool = await sql.connect(config);
+
+        const result = await pool.request()
+            .input("loja", sql.VarChar, loja)
+            .query(`
+                SELECT *
+                FROM dbo.Solicitacoes
+                WHERE destino = @loja
+                  AND status = 'Aprovado'
+                  AND documentoFiscalBase64 IS NOT NULL
+                  AND documentoFiscalBase64 <> ''
+                ORDER BY id DESC
+            `);
+
+        res.json(result.recordset);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Erro ao buscar recebimentos", details: err.message });
+    }
+});
+
+
 
 // START/OUVIR A APLICAÇÃO
 app.listen(3001, () => {
