@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 import base from "./BASE-ATUALIZADA-DEZ-25.json";
 
 const Base = () => {
@@ -8,15 +6,12 @@ const Base = () => {
   const [resultado, setResultado] = useState(null);
   const [erro, setErro] = useState("");
 
-  // Estados do arquivo + base64
   const [arquivo, setArquivo] = useState(null);
   const [arquivoBase64, setArquivoBase64] = useState(null);
 
-  // 🔥 Modal de confirmação
   const [mostrarModal, setMostrarModal] = useState(false);
   const [arquivoTemp, setArquivoTemp] = useState(null);
 
-  // Converter arquivo para Base64
   const converterParaBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const leitor = new FileReader();
@@ -26,7 +21,6 @@ const Base = () => {
     });
   };
 
-  // Quando o usuário seleciona um arquivo → abre modal
   const handleArquivo = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -35,7 +29,6 @@ const Base = () => {
     setMostrarModal(true);
   };
 
-  // Usuário confirmou no modal
   const confirmarUpload = async () => {
     if (!arquivoTemp) return;
 
@@ -44,16 +37,14 @@ const Base = () => {
     setArquivo(arquivoTemp);
     setArquivoBase64(base64);
 
-    setMostrarModal(false); // fecha modal
+    setMostrarModal(false);
   };
 
-  // Usuário cancelou
   const cancelarUpload = () => {
     setArquivoTemp(null);
     setMostrarModal(false);
   };
 
-  // Buscar item no JSON
   const buscarItem = () => {
     if (!codigo.trim()) {
       setErro("Digite um número de inventário");
@@ -66,38 +57,10 @@ const Base = () => {
     setErro(item ? "" : "Nenhum item encontrado.");
   };
 
-  // Salvar no Firebase
-  const salvarFirebase = async () => {
-    if (!arquivoBase64) {
-      alert("⚠️ Anexe um arquivo antes de salvar.");
-      return;
-    }
-
-    try {
-      await addDoc(collection(db, "arquivosInventario"), {
-        numeroInventario: resultado ? resultado["Nº inventário"] : "",
-        descricao: resultado ? resultado["Denominação do imobilizado"] : "",
-        empresa: resultado ? resultado["Empr"] : "",
-        filial: resultado ? resultado["Div"] : "",
-        arquivoBase64,
-        nomeArquivo: arquivo ? arquivo.name : "",
-        dataEnvio: new Date(),
-      });
-
-      alert("✅ Arquivo enviado ao Firebase!");
-      setArquivo(null);
-      setArquivoBase64(null);
-    } catch (erro) {
-      console.error("Erro ao salvar:", erro);
-      alert("❌ Erro ao salvar no Firebase.");
-    }
-  };
-
   return (
     <div style={{ padding: "20px" }}>
       <h2>Consulta de Inventário + Upload</h2>
 
-      {/* Campo de busca */}
       <input
         type="text"
         placeholder="Digite o Nº inventário"
@@ -114,7 +77,6 @@ const Base = () => {
         <p style={{ color: "red", marginTop: "20px" }}>{erro}</p>
       )}
 
-      {/* Resultado */}
       {resultado && (
         <div
           style={{
@@ -131,7 +93,6 @@ const Base = () => {
         </div>
       )}
 
-      {/* Upload */}
       <div style={{ marginTop: 15 }}>
         <label><b>Anexar arquivo:</b></label><br />
         <input type="file" onChange={handleArquivo} />
@@ -143,22 +104,6 @@ const Base = () => {
         )}
       </div>
 
-      <button
-        onClick={salvarFirebase}
-        style={{
-          padding: "10px 18px",
-          backgroundColor: "green",
-          color: "#fff",
-          border: "none",
-          borderRadius: 6,
-          cursor: "pointer",
-          marginTop: 15,
-        }}
-      >
-        Salvar no Firebase
-      </button>
-
-      {/* 🔥 Modal de confirmação */}
       {mostrarModal && (
         <div
           style={{

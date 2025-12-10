@@ -57,7 +57,7 @@ export default function Admin() {
     }
   };
 
-  // ↪ TELA DE CADASTRAR USUÁRIO
+  // TELA DE CADASTRAR USUÁRIO
   if (isLogged && view === "usuarios") {
     return (
       <div style={{
@@ -168,7 +168,7 @@ export default function Admin() {
     );
   }
 
-  // ↪ PAINEL ADMIN
+  // PAINEL ADMIN
   if (isLogged && view === "menu") {
     const opcoes = [
       { nome: "Alterar Usuários", icone: <FaUserEdit size={40} />, acao: () => setView("usuarios") },

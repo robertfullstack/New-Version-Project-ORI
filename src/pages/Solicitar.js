@@ -1,11 +1,8 @@
 
-// import "./Solicitar.css";
 import { useState, useEffect } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+
 import axios from "axios";
 
-// 🔹 IMPORTA O JSON LOCAL
 import dataProdutos from "./BASE-ATUALIZADA-DEZ-25.json";
 
 export default function Solicitar() {
@@ -44,6 +41,7 @@ export default function Solicitar() {
     "LIDER DE CAIXA",
     "LIDER DE SEÇÃO"
   ];
+
   const handleChangeCargoMalUso = (e) => {
     const valor = e.target.value;
     setCargoMalUso(valor);
@@ -68,7 +66,6 @@ export default function Solicitar() {
       reader.readAsDataURL(file);
     });
   };
-
 
   const [filtradosMalUso, setFiltradosMalUso] = useState([]);
 
@@ -110,40 +107,39 @@ export default function Solicitar() {
   const [cargo, setCargo] = useState("");
   const [filtrados, setFiltrados] = useState([]);
 
-  const handleChange = (e) => {
-    const valor = e.target.value.toUpperCase();
-    setCargo(valor);
+  // const handleChange = (e) => {
+  //   const valor = e.target.value.toUpperCase();
+  //   setCargo(valor);
 
-    if (valor.length > 0) {
-      const resultados = listaCargos.filter((c) =>
-        c.toUpperCase().includes(valor)
-      );
-      setFiltrados(resultados);
-    } else {
-      setFiltrados([]);
-    }
-  };
+  //   if (valor.length > 0) {
+  //     const resultados = listaCargos.filter((c) =>
+  //       c.toUpperCase().includes(valor)
+  //     );
+  //     setFiltrados(resultados);
+  //   } else {
+  //     setFiltrados([]);
+  //   }
+  // };
 
-  const selecionarCargo = (c) => {
-    setCargo(c);
-    setFiltrados([]);
-  };
+  // const selecionarCargo = (c) => {
+  //   setCargo(c);
+  //   setFiltrados([]);
+  // };
 
   const selecionarCargoMalUso = (cargo) => {
     setCargoMalUso(cargo);
-    setFiltradosMalUso([]); // fecha o menu
+    setFiltradosMalUso([]);
   };
   const agora = new Date();
 
   const Registro =
-    String(agora.getFullYear()).slice(2) +     // ano → YY
-    String(agora.getMonth() + 1).padStart(2, "0") + // mês
-    String(agora.getDate()).padStart(2, "0") +      // dia
-    String(agora.getHours()).padStart(2, "0") +     // hora
-    String(agora.getMinutes()).padStart(2, "0") +   // minuto
-    String(agora.getSeconds()).padStart(2, "0");    // segundo
-
-  // ENVIAR SOLICITAÇÃO
+    String(agora.getFullYear()).slice(2) +
+    String(agora.getMonth() + 1).padStart(2, "0") +
+    String(agora.getDate()).padStart(2, "0") +
+    String(agora.getHours()).padStart(2, "0") +
+    String(agora.getMinutes()).padStart(2, "0") +
+    String(agora.getSeconds()).padStart(2, "0");
+  // Send
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -188,7 +184,7 @@ export default function Solicitar() {
       setDefeitoMalUso("");
       setOcorrenciaMalUso("");
       setNomeGerente("");
-      setVolume(""); // 🔥 LIMPA O CAMPO
+      setVolume("");
       setRotaEnvio("");
 
     } catch (error) {
@@ -238,8 +234,6 @@ export default function Solicitar() {
           />
         </div>
 
-
-        {/* 🔥 BLOCO IGUAL AO MODELO "Produto: Código: Descrição:" */}
         <div
           style={{
             background: "#eef0ff",
@@ -366,10 +360,6 @@ export default function Solicitar() {
             </optgroup>
           </select>
 
-
-
-
-          {/* CAMPOS EXTRAS — APARECEM SOMENTE QUANDO O MOTIVO FOR "Mau uso" */}
           {motivo === "Mau uso" && (
             <div style={{
               marginTop: "10px",
@@ -396,7 +386,6 @@ export default function Solicitar() {
               <div style={{ position: "relative", width: "300px", marginBottom: "20px" }}>
                 <label><strong>Cargo:</strong></label>
 
-                {/* INPUT DO CARGO MAL USO */}
                 <input
                   type="text"
                   value={cargoMalUso}
@@ -411,7 +400,6 @@ export default function Solicitar() {
                   }}
                 />
 
-                {/* LISTA DE SUGESTÕES */}
                 {filtradosMalUso.length > 0 && (
                   <ul
                     style={{
@@ -478,8 +466,6 @@ export default function Solicitar() {
 
         </div>
 
-
-        {/* 🔥 NOVO CAMPO — Volume */}
         <div style={containerInput}>
           <label style={labelEstilo(volume)}>Volume</label>
           <input
@@ -506,9 +492,6 @@ export default function Solicitar() {
           </select>
         </div>
 
-
-
-        {/* Valor */}
         <div style={containerInput}>
           <label style={labelEstilo(valor)}>Valor</label>
           <input
@@ -519,7 +502,6 @@ export default function Solicitar() {
           />
         </div>
 
-        {/* Upload */}
         <label>Anexar Documento:</label>
         <input
           type="file"
